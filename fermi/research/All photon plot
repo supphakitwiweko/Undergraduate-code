@@ -1,0 +1,1636 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon May 10 16:32:32 2021
+
+@author: supphakit
+"""
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
+from astropy.io import fits
+from astropy.table import Table
+from astropy.coordinates import SkyCoord
+import astropy.units as u
+import scipy.interpolate
+import scipy.stats 
+plt.style.use('dark_background')
+plt.rcParams.update({"figure.facecolor" : '#0f0f0f00'})
+
+#Add
+catalog = fits.open('C:\\Users\\supph\\Documents\\Research\\gll_psc_v22.fit')
+#T = Table(catalog[1].data).show_in_browser()
+t = Table(catalog[1].data)
+
+#plot
+plt.figure(figsize=(20,10))
+plt.scatter((t['GLON']+180)%360 -180, t['GLAT'], marker ='.', s= 5 )
+plt.xlabel("Longitude")
+plt.ylabel("Latitude")
+plt.legend(loc='upper left')
+plt.show()
+
+#molling
+plt.figure(figsize=(20,10))
+ax = plt.subplot(projection='mollweide')
+gal = SkyCoord(t['GLON'][:],t['GLAT'][:], frame='galactic',unit=u.deg)
+ax.scatter(gal.l.wrap_at('180d').radian, gal.b.radian, s=5)
+ax.grid(alpha=0.7)
+
+#Select
+new_glon = np.logical_and(t['GLON'] >=52, t['GLON']<=55)
+new_tg = t[new_glon]
+new_glat = np.logical_and(new_tg['GLAT'] >= -1.2, new_tg['GLAT'] <=1.8)
+new_t = new_tg[new_glat]
+
+#open map
+mapp = fits.open('C:\\Users\\supph\\Documents\\Research\\Photon database\\L210510051548F357373F73_PH00.fits')
+t_mapp = Table(mapp[1].data)
+#t_mapp.show_in_browser()
+#open map
+#a day
+mapp_day = fits.open('C:\\Users\\supph\\Documents\\Research\\Photon database\\L210510051548F357373F73_PH00.fits')
+t_mapp_day = Table(mapp_day[1].data)
+#t_mapp.show_in_browser()
+
+# a week
+mapp_week = fits.open('C:\\Users\\supph\\Documents\\Research\\Photon database\\L210512114438F357373F94_PH00.fits')
+t_mapp_week = Table(mapp_week[1].data)
+
+# a month
+mapp_month = fits.open('C:\\Users\\supph\\Documents\\Research\\Photon database\\L210512115311F357373F34_PH00.fits')
+t_mapp_month = Table(mapp_month[1].data)
+
+# six months
+mapp_6months0 = fits.open('C:\\Users\\supph\\Documents\\Research\\Photon database\\L210512115543F357373F61_PH00.fits')
+mapp_6months1 = fits.open('C:\\Users\\supph\\Documents\\Research\\Photon database\\L210512120358F357373F94_PH01.fits')
+
+t_mapp_6months0 = Table(mapp_6months0[1].data)
+
+t_mapp_6months1 = Table(mapp_6months1[1].data)
+
+# a year
+
+mapp_year0 = fits.open('C:\\Users\\supph\\Documents\\Research\\Photon database\\L210512115908F357373F22_PH00.fits')
+mapp_year1 = fits.open('C:\\Users\\supph\\Documents\\Research\\Photon database\\L210512115908F357373F22_PH01.fits')
+mapp_year2 = fits.open('C:\\Users\\supph\\Documents\\Research\\Photon database\\L210512115908F357373F22_PH02.fits')
+mapp_year3 = fits.open('C:\\Users\\supph\\Documents\\Research\\Photon database\\L210512115908F357373F22_PH03.fits')
+
+t_mapp_year0 = Table(mapp_year0[1].data)
+t_mapp_year1 = Table(mapp_year1[1].data)
+t_mapp_year2 = Table(mapp_year2[1].data)
+t_mapp_year3 = Table(mapp_year3[1].data)
+
+#new_t = new_tg[new_glat].show_in_browser()
+#add label
+
+fix ,ax = plt.subplots(figsize=(20,10))
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]-0.1, new_t['GLAT'][i]+0.05))
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5-1.5, 53.5+1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+
+
+#photon local map by scatter
+
+#fig = plt.figure()
+#ax1 = fig.add_subplot(221)
+#ax2 = fig.add_subplot(222)
+#ax3 = fig.add_subplot(223)
+#ax4 = fig.add_subplot(224)
+#ax1.title.set_text('First Plot')
+#ax2.title.set_text('Second Plot')
+#ax3.title.set_text('Third Plot')
+#ax4.title.set_text('Fourth Plot')
+#plt.show()
+
+
+#a day
+fig, ax = plt.subplots(figsize=(20,10))
+
+ax.scatter(t_mapp['L'], t_mapp['B'], cmap = 'gist_yarg' , norm= LogNorm())
+
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.25, new_t['GLAT'][i]+0.1),fontsize = 20)
+   
+
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+ax.title.set_text('A day')
+#a week
+
+fig, ax = plt.subplots(figsize=(20,10))
+
+ax.scatter(t_mapp_week['L'], t_mapp_week['B'], cmap = 'gist_yarg' , norm= LogNorm())
+
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.25, new_t['GLAT'][i]+0.1),fontsize = 20)
+   
+
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+ax.title.set_text('A week')
+#a month
+
+fig, ax = plt.subplots(figsize=(20,10))
+
+ax.scatter(t_mapp_month['L'], t_mapp_month['B'], cmap = 'gist_yarg' , norm= LogNorm())
+
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.25, new_t['GLAT'][i]+0.1),fontsize = 20)
+   
+
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+ax.title.set_text('A month')
+#six months
+
+fig, ax = plt.subplots(figsize=(20,10))
+
+ax.scatter(t_mapp_6months0['L'], t_mapp_6months0['B'], cmap = 'gist_yarg' , norm= LogNorm())
+ax.scatter(t_mapp_6months1['L'], t_mapp_6months1['B'], cmap = 'gist_yarg' , norm= LogNorm())
+
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.25, new_t['GLAT'][i]+0.1),fontsize = 20)
+   
+
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+ax.title.set_text('Six month')
+
+#a year
+
+fig, ax = plt.subplots(figsize=(20,10))
+
+ax.scatter(t_mapp_year0['L'], t_mapp_year0['B'], cmap = 'gist_yarg' , norm= LogNorm())
+ax.scatter(t_mapp_year1['L'], t_mapp_year1['B'], cmap = 'gist_yarg' , norm= LogNorm())
+ax.scatter(t_mapp_year2['L'], t_mapp_year2['B'], cmap = 'gist_yarg' , norm= LogNorm())
+ax.scatter(t_mapp_year3['L'], t_mapp_year3['B'], cmap = 'gist_yarg' , norm= LogNorm())
+
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.25, new_t['GLAT'][i]+0.1),fontsize = 20)
+   
+
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+ax.title.set_text('A year')
+
+#photon local map histogram
+fig, ax = plt.subplots(figsize=(20,10))
+
+NBINS = (274)
+
+ax.hist2d(t_mapp['L'], t_mapp['B'], NBINS , cmap = plt.cm.jet , norm= LogNorm(),)
+
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]-0.1, new_t['GLAT'][i]+0.05))
+   
+
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5-1.5, 53.5+1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+
+#combined a day
+fig, ax = plt.subplots(figsize=(20,10))
+x = t_mapp_day['L']
+y = t_mapp_day['B']
+z = t_mapp_day['ENERGY']
+xi,yi = np.linspace(x.min(), x.max(),1000),np.linspace(y.min(), y.max(),100)
+xi,yi = np.meshgrid(xi,yi)
+rbf = scipy.interpolate.Rbf(x,y,z,function='linear')
+zi = rbf(xi,yi)
+plt.contourf(xi,yi,zi, cmap='inferno')
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]-0.1, new_t['GLAT'][i]+0.05))
+#add location
+
+ax.scatter(t_mapp_day['L'], t_mapp_day['B'], cmap = 'gist_yarg', norm= LogNorm())
+
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+##   
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5-1.5, 53.5+1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+ax.title.set_text('a day')
+cbar.set_label("Energy ( MeV )")    
+plt.show()
+
+#combined a week
+
+fig, ax = plt.subplots(figsize=(20,10))
+x = t_mapp_week['L']
+y = t_mapp_week['B']
+z = t_mapp_week['ENERGY']
+xi,yi = np.linspace(x.min(), x.max(),1000),np.linspace(y.min(), y.max(),100)
+xi,yi = np.meshgrid(xi,yi)
+rbf = scipy.interpolate.Rbf(x,y,z,function='linear')
+zi = rbf(xi,yi)
+plt.contourf(xi,yi,zi, cmap='inferno')
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]-0.1, new_t['GLAT'][i]+0.05))
+#add location
+
+ax.scatter(t_mapp_week['L'], t_mapp_week['B'], cmap = 'gist_yarg', norm= LogNorm())
+
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+##   
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5-1.5, 53.5+1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+ax.title.set_text('a week')
+cbar.set_label("Energy ( MeV )")    
+plt.show()
+
+#combined a month
+
+fig, ax = plt.subplots(figsize=(20,10))
+x = t_mapp_month['L']
+y = t_mapp_month['B']
+z = t_mapp_month['ENERGY']
+xi,yi = np.linspace(x.min(), x.max(),1000),np.linspace(y.min(), y.max(),100)
+xi,yi = np.meshgrid(xi,yi)
+rbf = scipy.interpolate.Rbf(x,y,z,function='linear')
+zi = rbf(xi,yi)
+plt.contourf(xi,yi,zi, cmap='inferno')
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]-0.1, new_t['GLAT'][i]+0.05))
+#add location
+
+ax.scatter(t_mapp_month['L'], t_mapp_month['B'], cmap = 'gist_yarg', norm= LogNorm())
+
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+##   
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5-1.5, 53.5+1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+ax.title.set_text('a month')
+cbar.set_label("Energy ( MeV )")    
+plt.show()
+
+#combined six months
+
+fig, ax = plt.subplots(figsize=(20,10))
+x = t_mapp_6months0['L']
+y = t_mapp_6months0['B']
+z = t_mapp_6months0['ENERGY']
+xi,yi = np.linspace(x.min(), x.max(),1000),np.linspace(y.min(), y.max(),100)
+xi,yi = np.meshgrid(xi,yi)
+rbf = scipy.interpolate.Rbf(x,y,z,function='linear')
+zi = rbf(xi,yi)
+plt.contourf(xi,yi,zi, cmap='inferno')
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+
+x = t_mapp_6months0['L']
+y = t_mapp_6months0['B']
+z = t_mapp_6months0['ENERGY']
+xi,yi = np.linspace(x.min(), x.max(),1000),np.linspace(y.min(), y.max(),100)
+xi,yi = np.meshgrid(xi,yi)
+rbf = scipy.interpolate.Rbf(x,y,z,function='linear')
+zi = rbf(xi,yi)
+plt.contourf(xi,yi,zi, cmap='inferno')
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]-0.1, new_t['GLAT'][i]+0.05))
+    
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5-1.5, 53.5+1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+ax.title.set_text('six month')
+cbar.set_label("Energy ( MeV )")    
+plt.show()
+#add location
+
+ax.scatter(t_mapp['L'], t_mapp['B'], cmap = 'gist_yarg', norm= LogNorm())
+
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+##   
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5-1.5, 53.5+1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+ax.title.set_text('six month')
+cbar.set_label("Energy ( MeV )")    
+plt.show()
+
+#combined a year
+fig, ax = plt.subplots(figsize=(20,10))
+x = t_mapp_year0['L']
+y = t_mapp_year0['B']
+z = t_mapp_year0['ENERGY']
+xi,yi = np.linspace(x.min(), x.max(),1000),np.linspace(y.min(), y.max(),100)
+xi,yi = np.meshgrid(xi,yi)
+rbf = scipy.interpolate.Rbf(x,y,z,function='linear')
+zi = rbf(xi,yi)
+plt.contourf(xi,yi,zi, cmap='inferno')
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]-0.1, new_t['GLAT'][i]+0.05))
+    
+fig, ax = plt.subplots(figsize=(20,10))
+x = t_mapp_year1['L']
+y = t_mapp_year1['B']
+z = t_mapp_year1['ENERGY']
+xi,yi = np.linspace(x.min(), x.max(),1000),np.linspace(y.min(), y.max(),100)
+xi,yi = np.meshgrid(xi,yi)
+rbf = scipy.interpolate.Rbf(x,y,z,function='linear')
+zi = rbf(xi,yi)
+plt.contourf(xi,yi,zi, cmap='inferno')
+
+fig, ax = plt.subplots(figsize=(20,10))
+x = t_mapp_year2['L']
+y = t_mapp_year2['B']
+z = t_mapp_year2['ENERGY']
+xi,yi = np.linspace(x.min(), x.max(),1000),np.linspace(y.min(), y.max(),100)
+xi,yi = np.meshgrid(xi,yi)
+rbf = scipy.interpolate.Rbf(x,y,z,function='linear')
+zi = rbf(xi,yi)
+plt.contourf(xi,yi,zi, cmap='inferno')
+
+fig, ax = plt.subplots(figsize=(20,10))
+x = t_mapp_year3['L']
+y = t_mapp_year3['B']
+z = t_mapp_year3['ENERGY']
+xi,yi = np.linspace(x.min(), x.max(),1000),np.linspace(y.min(), y.max(),100)
+xi,yi = np.meshgrid(xi,yi)
+rbf = scipy.interpolate.Rbf(x,y,z,function='linear')
+zi = rbf(xi,yi)
+plt.contourf(xi,yi,zi, cmap='inferno')
+
+#add location
+
+ax.scatter(t_mapp['L'], t_mapp['B'], cmap = 'gist_yarg', norm= LogNorm())
+
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+
+##   
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5-1.5, 53.5+1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+ax.title.set_text('a year')
+cbar.set_label("Energy ( MeV )")    
+plt.show()
+
+#by Contourf
+fig, ax = plt.subplots(figsize=(20,10))
+x = t_mapp['L']
+y = t_mapp['B']
+z = t_mapp['ENERGY']
+xi,yi = np.meshgrid(x,y)
+rbf = scipy.interpolate.Rbf(x,y,z,function='linear')
+zi = rbf(xi,yi)
+contour = plt.contour(xi,yi,zi ,cmap='inferno')
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=80)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]-0.1, new_t['GLAT'][i]+0.05))
+ax.clabel(contour, fontsize=10)   
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5-1.5, 53.5+1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+
+#by scatter
+
+#a day
+
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_day['L']
+y = t_mapp_day['B']
+z = t_mapp_day['ENERGY']
+a = ax.scatter(x, y, c=z, s=1000,cmap='inferno', norm= LogNorm(),marker ='.')
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none',marker ='o', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i], new_t['GLAT'][i]+0.1), fontsize = 20)
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(-1.2,1.8)
+ax.grid(alpha=0.5,color='black')
+cbar = plt.colorbar(a)
+cbar.set_label("Energy ( MeV )")   
+ax.title.set_text('A day')
+plt.show()
+
+#a week
+plt.style.use('seaborn')
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_week['L']
+y = t_mapp_week['B']
+z = t_mapp_week['ENERGY']
+a = ax.scatter(x, y, c=z, s=500,cmap='inferno', norm= LogNorm(),marker ='.')
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none',marker ='o', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i], new_t['GLAT'][i]+0.1), fontsize = 20)
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(-1.2,1.8)
+ax.grid(alpha=0.5,color='black')
+cbar = plt.colorbar(a)
+cbar.set_label("Energy ( MeV )")   
+ax.title.set_text('A week')
+plt.show()
+
+#a month
+plt.style.use('seaborn')
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_month['L']
+y = t_mapp_month['B']
+z = t_mapp_month['ENERGY']
+a = ax.scatter(x, y, c=z, s=250,cmap='inferno', norm= LogNorm(),marker ='.')
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none',marker ='o', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i], new_t['GLAT'][i]+0.1),fontsize = 20)
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(-1.2,1.8)
+ax.grid(alpha=0.5,color='black')
+cbar = plt.colorbar(a)
+cbar.set_label("Energy ( MeV )")   
+ax.title.set_text('A month')
+plt.show()
+
+#six months
+
+plt.style.use('seaborn')
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_6months0['L']
+y = t_mapp_6months0['B']
+z = t_mapp_6months0['ENERGY']
+a = ax.scatter(x, y, c=z, s=125,cmap='inferno', norm= LogNorm(),marker ='.')
+
+x = t_mapp_6months1['L']
+y = t_mapp_6months1['B']
+z = t_mapp_6months1['ENERGY']
+a = ax.scatter(x, y, c=z, s=125,cmap='inferno', norm= LogNorm(),marker ='.')
+
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none',marker ='o', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i], new_t['GLAT'][i]+0.1),fontsize = 20)
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(-1.2,1.8)
+ax.grid(alpha=0.5,color='black')
+cbar = plt.colorbar(a)
+cbar.set_label("Energy ( MeV )")   
+ax.title.set_text('Six mounths')
+plt.show()
+
+#a year
+
+plt.style.use('seaborn')
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_year0['L']
+y = t_mapp_year0['B']
+z = t_mapp_year0['ENERGY']
+a = ax.scatter(x, y, c=z, s=100,cmap='inferno', norm= LogNorm(),marker ='.')
+
+x = t_mapp_year1['L']
+y = t_mapp_year1['B']
+z = t_mapp_year1['ENERGY']
+a = ax.scatter(x, y, c=z, s=100,cmap='inferno', norm= LogNorm(),marker ='.')
+
+x = t_mapp_year2['L']
+y = t_mapp_year2['B']
+z = t_mapp_year2['ENERGY']
+a = ax.scatter(x, y, c=z, s=100,cmap='inferno', norm= LogNorm(),marker ='.')
+
+x = t_mapp_year3['L']
+y = t_mapp_year3['B']
+z = t_mapp_year3['ENERGY']
+a = ax.scatter(x, y, c=z, s=100,cmap='inferno', norm= LogNorm(),marker ='.')
+
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none',marker ='o', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i], new_t['GLAT'][i]+0.1),fontsize = 20)
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(-1.2,1.8)
+ax.grid(alpha=0.5,color='black')
+cbar = plt.colorbar(a)
+cbar.set_label("Energy ( MeV )")   
+ax.title.set_text('A year')
+plt.show()
+
+
+#combined scatter and contourf
+# a day
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_day['L']
+y = t_mapp_day['B']
+z = t_mapp_day['ENERGY']
+xi,yi = np.linspace(x.min(), x.max(),1000),np.linspace(y.min(), y.max(),100)
+xi,yi = np.meshgrid(xi,yi)
+rbf = scipy.interpolate.Rbf(x,y,z,function='linear')
+zi = rbf(xi,yi)
+plt.contourf(xi,yi,zi, cmap='inferno')
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]-0.1, new_t['GLAT'][i]+0.05),fontsize = 20)
+
+#add density
+
+x = t_mapp_day['L']
+y = t_mapp_day['B']
+z = t_mapp_day['ENERGY']
+a = ax.scatter(x, y, c=z, s=1000,cmap='inferno', norm= LogNorm(),marker ='.')
+
+##   
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+ax.title.set_text('A day')
+cbar.set_label("Energy ( MeV )")    
+plt.show()
+
+# a week
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_week['L']
+y = t_mapp_week['B']
+z = t_mapp_week['ENERGY']
+xi,yi = np.linspace(x.min(), x.max(),1000),np.linspace(y.min(), y.max(),100)
+xi,yi = np.meshgrid(xi,yi)
+rbf = scipy.interpolate.Rbf(x,y,z,function='linear')
+zi = rbf(xi,yi)
+plt.contourf(xi,yi,zi, cmap='inferno')
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]-0.1, new_t['GLAT'][i]+0.05),fontsize = 20)
+
+#add density
+
+x = t_mapp_week['L']
+y = t_mapp_week['B']
+z = t_mapp_week['ENERGY']
+a = ax.scatter(x, y, c=z, s=500,cmap='inferno', norm= LogNorm(),marker ='.')
+
+##   
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+ax.title.set_text('A week')
+cbar.set_label("Energy ( MeV )")    
+plt.show()
+
+# a month
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_month['L']
+y = t_mapp_month['B']
+z = t_mapp_month['ENERGY']
+xi,yi = np.linspace(x.min(), x.max(),1000),np.linspace(y.min(), y.max(),100)
+xi,yi = np.meshgrid(xi,yi)
+rbf = scipy.interpolate.Rbf(x,y,z,function='linear')
+zi = rbf(xi,yi)
+plt.contourf(xi,yi,zi, cmap='inferno')
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]-0.1, new_t['GLAT'][i]+0.05),fontsize = 20)
+
+#add density
+
+x = t_mapp_month['L']
+y = t_mapp_month['B']
+z = t_mapp_month['ENERGY']
+a = ax.scatter(x, y, c=z, s=250,cmap='inferno', norm= LogNorm(),marker ='.')
+
+##   
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+ax.title.set_text('A month')
+cbar.set_label("Energy ( MeV )")    
+plt.show()
+
+#six month
+
+
+#combine x,y,z
+
+#x
+x1 = t_mapp_6months0['L']
+x2 = t_mapp_6months1['L']
+x = np.concatenate((x1,x2))
+
+#y
+y1 = t_mapp_6months0['B']
+y2 = t_mapp_6months1['B']
+y = np.concatenate((y1,y2))
+
+#z
+z1 = t_mapp_6months0['ENERGY']
+z2 = t_mapp_6months1['ENERGY']
+z = np.concatenate((z1,z2))
+
+fig, ax = plt.subplots(figsize=(30,20))
+
+xi,yi = np.linspace(x.min(), x.max(),1000),np.linspace(y.min(), y.max(),100)
+xi,yi = np.meshgrid(xi,yi)
+rbf = scipy.interpolate.Rbf(x,y,z,function='linear')
+zi = rbf(xi,yi)
+plt.contourf(xi,yi,zi, cmap='inferno')
+
+
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]-0.1, new_t['GLAT'][i]+0.05),fontsize = 20)
+
+#add scatter
+#1
+
+a = ax.scatter(x, y, c=z, s=125,cmap='inferno', norm= LogNorm(),marker ='.')
+
+##   
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+ax.title.set_text('Six months')
+cbar.set_label("Energy ( MeV )")    
+plt.show()
+
+
+#a year
+
+
+#combined x,y,z
+#x
+x1 = t_mapp_year0['L']
+x2 = t_mapp_year1['L']
+x3 = t_mapp_year2['L']
+x4 = t_mapp_year3['L']
+
+x = np.concatenate((x1,x2,x3,x4))
+
+#y
+y1 = t_mapp_year0['B']
+y2 = t_mapp_year1['B']
+y3 = t_mapp_year2['B']
+y4 = t_mapp_year3['B']
+y = np.concatenate((y1,y2,y3,y4))
+
+#z
+z1 = t_mapp_year0['ENERGY']
+z2 = t_mapp_year1['ENERGY']
+z3 = t_mapp_year2['ENERGY']
+z4 = t_mapp_year3['ENERGY']
+z = np.concatenate((z1,z2,z3,z4))
+
+fig, ax = plt.subplots(figsize=(30,20))
+
+xi,yi = np.linspace(x.min(), x.max(),1000),np.linspace(y.min(), y.max(),100)
+xi,yi = np.meshgrid(xi,yi)
+rbf = scipy.interpolate.Rbf(x,y,z,function='linear')
+zi = rbf(xi,yi)
+plt.contourf(xi,yi,zi, cmap='inferno')
+
+#
+
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]-0.1, new_t['GLAT'][i]+0.05),fontsize = 20)
+
+#add scatter
+#1
+
+x = t_mapp_year0['L']
+y = t_mapp_year0['B']
+z = t_mapp_year0['ENERGY']
+a = ax.scatter(x, y, c=z, s=50,cmap='inferno', norm= LogNorm(),marker ='.')
+
+#2
+ 
+x = t_mapp_year1['L']
+y = t_mapp_year1['B']
+z = t_mapp_year1['ENERGY']
+a = ax.scatter(x, y, c=z, s=50,cmap='inferno', norm= LogNorm(),marker ='.')
+
+#3
+x = t_mapp_year2['L']
+y = t_mapp_year2['B']
+z = t_mapp_year2['ENERGY']
+a = ax.scatter(x, y, c=z, s=50,cmap='inferno', norm= LogNorm(),marker ='.')
+
+#4
+
+x = t_mapp_year3['L']
+y = t_mapp_year3['B']
+z = t_mapp_year3['ENERGY']
+a = ax.scatter(x, y, c=z, s=50,cmap='inferno', norm= LogNorm(),marker ='.')
+
+##   
+cbar = plt.colorbar(a)
+ax.set_xlabel("Galactic Longitude (deg)")
+ax.set_ylabel("Galactic Latitude (deg)")
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+ax.title.set_text('a year')
+cbar.set_label("Energy ( MeV )")    
+plt.show()
+
+
+#his2 plotted
+
+#bin = 00
+bin = 10
+# a day
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_day['L']
+y = t_mapp_day['B']
+z = t_mapp_day['ENERGY']
+
+a = plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+#ax.set_xlim(53.5+1.5, 53.5-1.5)
+#ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A day and bin = 100',fontsize=50)
+plt.show()
+
+# a week
+
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_week['L']
+y = t_mapp_week['B']
+z = t_mapp_week['ENERGY']
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A week and bin = 100',fontsize=50)
+plt.show()
+#a month
+
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_month['L']
+y = t_mapp_month['B']
+z = t_mapp_month['ENERGY']
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A month and bin = 100',fontsize=50)
+plt.show()
+
+#six month
+
+fig, ax = plt.subplots(figsize=(30,20))
+x1 = t_mapp_6months0['L']
+x2 = t_mapp_6months1['L']
+x = np.concatenate((x1,x2))
+
+#y
+y1 = t_mapp_6months0['B']
+y2 = t_mapp_6months1['B']
+y = np.concatenate((y1,y2))
+
+#z
+z1 = t_mapp_6months0['ENERGY']
+z2 = t_mapp_6months1['ENERGY']
+z = np.concatenate((z1,z2))
+
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('Six months and bin = 100',fontsize=50)
+plt.show()
+
+#a year
+
+
+fig, ax = plt.subplots(figsize=(30,20))
+#x
+x1 = t_mapp_year0['L']
+x2 = t_mapp_year1['L']
+x3 = t_mapp_year2['L']
+x4 = t_mapp_year3['L']
+
+x = np.concatenate((x1,x2,x3,x4))
+
+#y
+y1 = t_mapp_year0['B']
+y2 = t_mapp_year1['B']
+y3 = t_mapp_year2['B']
+y4 = t_mapp_year3['B']
+y = np.concatenate((y1,y2,y3,y4))
+
+#z
+z1 = t_mapp_year0['ENERGY']
+z2 = t_mapp_year1['ENERGY']
+z3 = t_mapp_year2['ENERGY']
+z4 = t_mapp_year3['ENERGY']
+z = np.concatenate((z1,z2,z3,z4))
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A year and bin = 100',fontsize=50)
+plt.show()
+#bin = 200
+bin = 200
+# a day
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_day['L']
+y = t_mapp_day['B']
+z = t_mapp_day['ENERGY']
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A day and bin = 200',fontsize=50)
+plt.show()
+
+# a week
+
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_week['L']
+y = t_mapp_week['B']
+z = t_mapp_week['ENERGY']
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A week and bin = 200',fontsize=50)
+plt.show()
+#a month
+
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_month['L']
+y = t_mapp_month['B']
+z = t_mapp_month['ENERGY']
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A month and bin = 200',fontsize=50)
+plt.show()
+
+#six month
+
+fig, ax = plt.subplots(figsize=(30,20))
+x1 = t_mapp_6months0['L']
+x2 = t_mapp_6months1['L']
+x = np.concatenate((x1,x2))
+
+#y
+y1 = t_mapp_6months0['B']
+y2 = t_mapp_6months1['B']
+y = np.concatenate((y1,y2))
+
+#z
+z1 = t_mapp_6months0['ENERGY']
+z2 = t_mapp_6months1['ENERGY']
+z = np.concatenate((z1,z2))
+
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('Six months and bin = 200',fontsize=50)
+plt.show()
+
+#a year
+
+
+fig, ax = plt.subplots(figsize=(30,20))
+#x
+x1 = t_mapp_year0['L']
+x2 = t_mapp_year1['L']
+x3 = t_mapp_year2['L']
+x4 = t_mapp_year3['L']
+
+x = np.concatenate((x1,x2,x3,x4))
+
+#y
+y1 = t_mapp_year0['B']
+y2 = t_mapp_year1['B']
+y3 = t_mapp_year2['B']
+y4 = t_mapp_year3['B']
+y = np.concatenate((y1,y2,y3,y4))
+
+#z
+z1 = t_mapp_year0['ENERGY']
+z2 = t_mapp_year1['ENERGY']
+z3 = t_mapp_year2['ENERGY']
+z4 = t_mapp_year3['ENERGY']
+z = np.concatenate((z1,z2,z3,z4))
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A year and bin = 200',fontsize=50)
+plt.show()
+
+#bin = 300
+bin = 300
+# a day
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_day['L']
+y = t_mapp_day['B']
+z = t_mapp_day['ENERGY']
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A day and bin = 300',fontsize=50)
+plt.show()
+
+# a week
+
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_week['L']
+y = t_mapp_week['B']
+z = t_mapp_week['ENERGY']
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A week and bin = 300',fontsize=50)
+plt.show()
+#a month
+
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_month['L']
+y = t_mapp_month['B']
+z = t_mapp_month['ENERGY']
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A month and bin = 300',fontsize=50)
+plt.show()
+
+#six month
+
+fig, ax = plt.subplots(figsize=(30,20))
+x1 = t_mapp_6months0['L']
+x2 = t_mapp_6months1['L']
+x = np.concatenate((x1,x2))
+
+#y
+y1 = t_mapp_6months0['B']
+y2 = t_mapp_6months1['B']
+y = np.concatenate((y1,y2))
+
+#z
+z1 = t_mapp_6months0['ENERGY']
+z2 = t_mapp_6months1['ENERGY']
+z = np.concatenate((z1,z2))
+
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('Six months and bin = 300',fontsize=50)
+plt.show()
+
+#a year
+
+
+fig, ax = plt.subplots(figsize=(30,20))
+#x
+x1 = t_mapp_year0['L']
+x2 = t_mapp_year1['L']
+x3 = t_mapp_year2['L']
+x4 = t_mapp_year3['L']
+
+x = np.concatenate((x1,x2,x3,x4))
+
+#y
+y1 = t_mapp_year0['B']
+y2 = t_mapp_year1['B']
+y3 = t_mapp_year2['B']
+y4 = t_mapp_year3['B']
+y = np.concatenate((y1,y2,y3,y4))
+
+#z
+z1 = t_mapp_year0['ENERGY']
+z2 = t_mapp_year1['ENERGY']
+z3 = t_mapp_year2['ENERGY']
+z4 = t_mapp_year3['ENERGY']
+z = np.concatenate((z1,z2,z3,z4))
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A year and bin = 300',fontsize=50)
+plt.show()
+
+#bin = 400
+bin = 400
+# a day
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_day['L']
+y = t_mapp_day['B']
+z = t_mapp_day['ENERGY']
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A day and bin = 400',fontsize=50)
+plt.show()
+
+# a week
+
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_week['L']
+y = t_mapp_week['B']
+z = t_mapp_week['ENERGY']
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A week and bin = 400',fontsize=50)
+plt.show()
+#a month
+
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_month['L']
+y = t_mapp_month['B']
+z = t_mapp_month['ENERGY']
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A month and bin = 400',fontsize=50)
+plt.show()
+
+#six month
+
+fig, ax = plt.subplots(figsize=(30,20))
+x1 = t_mapp_6months0['L']
+x2 = t_mapp_6months1['L']
+x = np.concatenate((x1,x2))
+
+#y
+y1 = t_mapp_6months0['B']
+y2 = t_mapp_6months1['B']
+y = np.concatenate((y1,y2))
+
+#z
+z1 = t_mapp_6months0['ENERGY']
+z2 = t_mapp_6months1['ENERGY']
+z = np.concatenate((z1,z2))
+
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('Six months and bin = 400',fontsize=50)
+plt.show()
+
+#a year
+
+
+fig, ax = plt.subplots(figsize=(30,20))
+#x
+x1 = t_mapp_year0['L']
+x2 = t_mapp_year1['L']
+x3 = t_mapp_year2['L']
+x4 = t_mapp_year3['L']
+
+x = np.concatenate((x1,x2,x3,x4))
+
+#y
+y1 = t_mapp_year0['B']
+y2 = t_mapp_year1['B']
+y3 = t_mapp_year2['B']
+y4 = t_mapp_year3['B']
+y = np.concatenate((y1,y2,y3,y4))
+
+#z
+z1 = t_mapp_year0['ENERGY']
+z2 = t_mapp_year1['ENERGY']
+z3 = t_mapp_year2['ENERGY']
+z4 = t_mapp_year3['ENERGY']
+z = np.concatenate((z1,z2,z3,z4))
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A year and bin = 400',fontsize=50)
+plt.show()
+
+#bin = 500
+bin = 500
+# a day
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_day['L']
+y = t_mapp_day['B']
+z = t_mapp_day['ENERGY']
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A day and bin = 500',fontsize=50)
+plt.show()
+
+# a week
+
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_week['L']
+y = t_mapp_week['B']
+z = t_mapp_week['ENERGY']
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A week and bin = 500',fontsize=50)
+plt.show()
+#a month
+
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_month['L']
+y = t_mapp_month['B']
+z = t_mapp_month['ENERGY']
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A month and bin = 500',fontsize=50)
+plt.show()
+
+#six month
+
+fig, ax = plt.subplots(figsize=(30,20))
+x1 = t_mapp_6months0['L']
+x2 = t_mapp_6months1['L']
+x = np.concatenate((x1,x2))
+
+#y
+y1 = t_mapp_6months0['B']
+y2 = t_mapp_6months1['B']
+y = np.concatenate((y1,y2))
+
+#z
+z1 = t_mapp_6months0['ENERGY']
+z2 = t_mapp_6months1['ENERGY']
+z = np.concatenate((z1,z2))
+
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('Six months and bin = 500',fontsize=50)
+plt.show()
+
+#a year
+
+
+fig, ax = plt.subplots(figsize=(30,20))
+#x
+x1 = t_mapp_year0['L']
+x2 = t_mapp_year1['L']
+x3 = t_mapp_year2['L']
+x4 = t_mapp_year3['L']
+
+x = np.concatenate((x1,x2,x3,x4))
+
+#y
+y1 = t_mapp_year0['B']
+y2 = t_mapp_year1['B']
+y3 = t_mapp_year2['B']
+y4 = t_mapp_year3['B']
+y = np.concatenate((y1,y2,y3,y4))
+
+#z
+z1 = t_mapp_year0['ENERGY']
+z2 = t_mapp_year1['ENERGY']
+z3 = t_mapp_year2['ENERGY']
+z4 = t_mapp_year3['ENERGY']
+z = np.concatenate((z1,z2,z3,z4))
+
+plt.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A year and bin = 00',fontsize=50)
+plt.show()
+
+#to average
+bin = 10
+# a day
+#data
+fig, ax = plt.subplots(figsize=(30,20))
+x = t_mapp_day['L']
+y = t_mapp_day['B']
+z = t_mapp_day['ENERGY']
+#number of photon
+
+ret = scipy.stats.binned_statistic_2d(x, y, z, statistic=np.mean, bins=bin)
+fig.suptitle('A year and bin = 00',fontsize=50)
+ax.grid(alpha=0.5)  
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.imshow(ret.statistic.T,cmap='inferno')
+
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)  
+fig.suptitle('A year and bin = 00',fontsize=50)
+ax.imshow(ret.statistic.T,cmap='inferno')
+
+#####other method not work
+
+digitized = np.digitize(z, bin)
+bin_means = [z[digitized == i].mean() for i in range(1, len(bin))]
+
+####
+bin_means = (np.histogram(z, bin, weights=z)[0] / np.histogram(z, bin)[0])
+x = np.histogram(x, bin)[0]
+y = np.histogram(y, bin)[0]
+#check
+
+plt.hist2d(x, y, weights=(bin_means), cmap='inferno',bins=bin)
+ax.scatter((new_t['GLON'] +180)%360 - 180, new_t['GLAT'],facecolor='none', edgecolor = 'y' , s=1000)
+for i, txt in enumerate(new_t['Source_Name']):           
+    ax.annotate(txt, (new_t['GLON'][i]+0.1, new_t['GLAT'][i]+0.1),fontsize = 20)
+
+#add density
+cbar = plt.colorbar()
+ax.set_xlabel("Galactic Longitude (deg)",fontsize=40)
+ax.set_ylabel("Galactic Latitude (deg)",fontsize=40)
+ax.set_xlim(53.5+1.5, 53.5-1.5)
+ax.set_ylim(0.3-1.5, 0.3+1.5)
+ax.grid(alpha=0.5)
+cbar.set_label("Energy ( MeV )",fontsize=40)    
+fig.suptitle('A year and bin = 00',fontsize=50)
+plt.show()
+
+#2
+bin = 100
+# a day
+#data
+fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(30, 20))
+
+x = t_mapp_day['L']
+y = t_mapp_day['B']
+z = t_mapp_day['ENERGY']
+ax0.ret = scipy.stats.binned_statistic_2d(x, y, z, statistic='mean', bins=bin)
+ax0.imshow(ret.statistic.T,cmap='inferno')
+
+#reference
+
+x = t_mapp_day['L']
+y = t_mapp_day['B']
+z = t_mapp_day['ENERGY']
+ax1.hist2d(x, y, weights=(z), cmap='inferno',bins=bin)
+
+#plt.bar
+
+
+#t_mapp_day['L'].shape
+#t_mapp_week['L'].shape
+#t_mapp_month['L'].shape
+z1 = t_mapp_6months0['ENERGY']
+z2 = t_mapp_6months1['ENERGY']
+t_mapp_6months = np.concatenate((z1,z2))
+#t_mapp_6months.shape
+x1 = t_mapp_year0['L']
+x2 = t_mapp_year1['L']
+x3 = t_mapp_year2['L']
+x4 = t_mapp_year3['L']
+t_mapp_year = np.concatenate((x1,x2,x3,x4))
+#t_mapp_year.shape
+
+#plt
+plt.style.use('seaborn')
+number = [274,2370,7537,39703,72673]
+
+name = ['A day','A week','A month', 'Six months', 'A year']
+
+fig = plt.figure(figsize = (20, 10))
+ 
+# creating the bar plot
+plt.bar(name[0], number[0], color ='red')
+plt.bar(name[1], number[1], color ='yellow')
+plt.bar(name[2], number[2], color ='orange')
+plt.bar(name[3], number[3], color ='g')
+plt.bar(name[4], number[4], color ='blue')
+
+plt.grid(color='black')
+plt.xlabel("Time",fontsize=20)
+plt.ylabel("Number of photon",fontsize=20)
+plt.title("Number of photon each the time",fontsize=20)
+plt.show()
